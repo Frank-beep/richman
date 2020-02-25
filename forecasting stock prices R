@@ -1,0 +1,34 @@
+#forecasting stock price movement
+#load the historical stocks prices data)
+setwd("C:/Users/nic/Desktop/nse")
+x=read.csv('SCOM.csv',header=T)
+prices=x[,2]
+#we need to convert daily prices into log-returns
+stock = diff(log(prices),lag=1)
+# Plot log returns
+plot(stock,type='l', main='log returns plot')
+# Conduct ADF test on log returns series to determine its stationarity, should the series be instationary, then we need to difference it to make it stationary to make it predictable. The p-value should be less than 0.05 to prove stationarity
+print(adf.test(stock))
+#In the next step, we fixed a breakpoint which will be used to split the returns dataset in two parts further down the code.
+# Split the dataset in two parts - training and testing
+
+
+
+
+breakpoint = floor(nrow(stock)*(2.9/3))
+# Initialzing an xts object for Actual log returns
+require(xts)
+Actual_series = xts(0,as.Date("2014-11-25","%Y-%m-%d"))
+
+# Initialzing a dataframe for the forecasted return series
+forecasted_series = data.frame(Forecasted = numeric())
+
+for (b in breakpoint:(nrow(stock)-1)) {
+  
+  stock_train = stock[1:b, ]
+  stock_test = stock[(b+1):nrow(stock), ]
+  # Summary of the ARIMA model using the determined (p,d,q) parameters
+  fit = arima(stock_train, order = c(2, 0, 2),include.mean=FALSE)
+  summary(fit)
+  
+  
